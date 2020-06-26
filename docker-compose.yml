@@ -1,0 +1,30 @@
+version: '2'
+volumes:
+  netdatalib:
+  netdatacache:
+services:
+  netdata:
+    build: netdata
+    ports:
+      - '19999:19999'
+    environment:
+      - PGID=988
+        # we get this injected as unix:///...sock, but netdata doesn't like that
+      - DOCKER_HOST=/var/run/balena-engine.sock
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    labels:
+      io.balena.features.balena-socket: 1
+      io.balena.features.procfs: 1
+      io.balena.features.sysfs: 1
+    volumes:
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+  stress:
+    build: stress
+    environment:
+      - MEMPRES=0.9
+  unsmol:
+    build: unsmol
